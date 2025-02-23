@@ -7,22 +7,22 @@ This is a bash script, so you have to run it in a Linux environment.
 
 ## Installation
 
-`git clone https://github.com/kercre123/dvcbs.git`
+`git clone https://github.com/Switch-modder/dvcbs-reloaded`
 
-`cd dvcbs`
+`cd dvcbs-reloaded`
 
 `chmod +rwx *`
 
 `sudo -s`
 
-`./dvcbs.sh -h`
+`./dvcbs-reloaded.sh -h`
 
 If you have your own private key to sign the OTA with, place it in ./resources/private.pem
 
 If you don't have one, the script will generate one for you when you build.
 
 ## Usage
-This is still a full-root script, which means you have to either run `sudo -s` before running the script or just run `sudo ./dvcbs.sh`. 
+This is still a full-root script, which means you have to either run `sudo -s` before running the script or just run `sudo ./dvcbs-reloaded.sh`. 
 
 `sudo -s` has already been done in the installation phase.
 
@@ -30,17 +30,17 @@ This is still a full-root script, which means you have to either run `sudo -s` b
 * Shows the usage page.
 
 `-dm`
-* This downloads the latest OTA from DDL's servers and mounts it in ./oskrlatest.
+* This downloads the latest OTA from wire's server and mounts it in mounted/.
 
 `-m {dir}`
-* example when mounting oskrlatest (if already downloaded): `./dvcbs.sh -m`
-* example when mounting OTA in your own directory: `./dvcbs.sh -m otawire`
-* This will mount the OTA or apq8009-robot-sysfs.img in the directory you give it. If you used -dm, this will automatically detect the oskrlatest folder and you don't have to provide a dir.
+* example when mounting oskrlatest (if already downloaded): `./dvcbs-reloaded.sh -m`
+* example when mounting OTA in your own directory: `./dvcbs-reloaded.sh -m otawire`
+* This will mount the OTA or apq8009-robot-sysfs.img in the directory you give it. If you used -dm, this will automatically detect the mounted folder and you don't have to provide a dir.
 
 `-b {versionbase} {versioncode} {dir}`
-* example when building oskrlatest: `./dvcbs.sh -b 1.8.0 123`
-* example when building in your own dir: `./dvcbs.sh -b 1.8.0 123 otawire`
-* This builds the OTA or apq8009-robot-sysfs.img in the directory you give it. If you don't have a directory, it will try to find the oskrlatest folder.
+* example when building oskrlatest: `./dvcbs-reloaded.sh -b 1.8.0 123`
+* example when building in your own dir: `./dvcbs-reloaded.sh -b 1.8.0 123 otawire`
+* This builds the OTA or apq8009-robot-sysfs.img in the directory you give it. If you don't have a directory, it will try to find the mounted folder and build for OSKR robots.
 
 `-bt {versionbase} {versioncode} {type} {dir}`
 * This builds the OTA or apq8009-robot-sysfs.img in the dirctory you give it, but with a certain build type. whiskey, dev, and oskr are your options.
@@ -50,21 +50,21 @@ This is still a full-root script, which means you have to either run `sudo -s` b
 
 ## Example build
 
-Now that you are in `sudo -s` and you are in the directory with `dvcbs.sh`, you are ready to make a build.
+Now that you are in `sudo -s` and you are in the directory with `dvcbs-reloaded.sh`, you are ready to make a build.
 
-First, lets get the latest OSKR OTA and mount it. run `./dvcbs.sh -dm`
+First, lets get the latest OSKR OTA and mount it. run `./dvcbs-reloaded.sh -dm`
 
-This makes a `./oskrcurrent` directory with a mounted OSKR OTA in it.
+This makes a `mounted` directory with a mounted OSKR OTA in it.
 
 Lets cd into it and edit some things.
 
-`cd oskrcurrent/edits/` This puts you at the root of the OTA.
+`cd mounted/edits/` This puts you at the root of the OTA.
 
 `nano anki/etc/update-engine.env` This puts you in a text editor. Set "UPDATE_ENGINE_ALLOW_DOWNGRADE" to "True".
 
-`cd ../../` This puts you back in the directory with the ./dvcbs.sh script. ../ means previous directory.
+`cd ../../` This puts you back in the directory with the ./dvcbs-reloaded.sh script. ../ means previous directory.
 
-Now we can build. `./dvcbs.sh -b 1.8.0 1`
+Now we can build. `./dvcbs-reloaded.sh -b 1.8.0 1`
 
 To put the build on your bot, we will need to SCP in the key.
 

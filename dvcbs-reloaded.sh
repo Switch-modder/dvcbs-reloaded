@@ -22,16 +22,16 @@ builddate=${buildyear}${buildmonth}${buildday}${buildhour}${buildminute}
 function help()
 {
    echo "-h                                                   This message"
-   echo "-dm                                                  Downloads latest OSKR OTA and mounts it in ./oskrlatest directory."
+   echo "-dm                                                  Downloads latest OSKR OTA and mounts it in 'mounted' directory."
    echo "-m {path/to/ota}                                     Mounts the OTA provided."
    echo "-b {versionbase} {versioncode} {dir}                 Builds apq8009-robot-sysfs.img in directory provided. If you used -dm, don't put a directory. It will auto detect."
-   echo "-bt {versionbase} {versioncode} {type} {dir}         Build apq8009-robot-sysfs.img in directory provided with a specific type. Choice are dev, whiskey, oskr. It will auto detect ./oskrcurrent."
+   echo "-bt {versionbase} {versioncode} {type} {dir}         Build apq8009-robot-sysfs.img in directory provided with a specific type. Choice are dev, whiskey, oskr, dvt3, and orange boot. It will auto detect the 'mounted' folder."
    echo "-mbt {versionbase} {versioncode} {type} {dir}        Mounts then builds and OTA with type and dir you provided. Type and dir and required."
    exit 0
 }
 
-trap ctrl_c INT                                                                 
-                                  
+trap ctrl_c INT
+
 if [ "$EUID" -ne 0 ]
   then echo "Please run this script as root. You can either run 'sudo -s' and then run the script normally, or just run 'sudo ./dvcbs.sh {args}'."
   exit
@@ -44,7 +44,7 @@ elif [ ! -f ${refo}/build.prop ]; then
    echo "./${refo}/build.prop doesn't exist. You may not have the resources folder next to this script, or it is corrupted."
    exit 0
 fi
-                                              
+
 function ctrl_c() {
     echo -e "\n\nStopping"
     exit 1 
@@ -52,7 +52,7 @@ function ctrl_c() {
 
 function checktype()
 {
-if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskrns" ] || [ ! ${BUILD_TYPE} == "orange" ]; then
+if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ]; then
    if [ -z ${BUILD_TYPE} ]; then
       echo "No build type provided. Using oskr as default."
       BUILD_TYPE=oskr
@@ -60,13 +60,13 @@ if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_
    elif [ ${BUILD_TYPE} == "dev" ]; then
       echo "Dev build type selected. Note that this won't work on your OSKR bot. Only Anki-unlocked bots. This build won't be signed."
       BUILD_SUFFIX=d
-   elif [ ${BUILD_TYPE} == "oskr" ]; then
-      echo "OSKR build type selected."
+   elif [ ${BUILD_TYPE} == "oskrs" ]; then
+      echo "OSKRs build type selected."
       BUILD_SUFFIX=oskr
    elif [ ${BUILD_TYPE} == "whiskey" ]; then
       echo "Whiskey build type selected. This will work on a dev bot, but rampost may flash a weird dfu causing the back lights to go weird. This is meant for Whiskey DVT1 bots and not normal bots."
       BUILD_SUFFIX=d
-   elif [ ${BUILD_TYPE} == "oskrns" ]; then
+   elif [ ${BUILD_TYPE} == "oskr" ]; then
       echo "OSKR no signing build type selected. This build won't be signed."
       BUILD_SUFFIX=oskr
    elif [ ${BUILD_TYPE} == "orange" ]; then
@@ -97,12 +97,12 @@ fi
 function parsedirbuild()
 {
 if [ -z "${origdir}" ]; then
-    echo "Directory not provided. Checking ./oskrcurrent"
-    if [ -f oskrcurrent/apq8009-robot-sysfs.img ]; then
-        echo "./oskrcurrent has a mounted OTA. Using."
-        dir=oskrcurrent/
+    echo "Directory not provided. Checking ./mounted"
+    if [ -f mounted/apq8009-robot-sysfs.img ]; then
+        echo "./mounted has a mounted OTA. Using."
+        dir=mounted/
     else 
-        echo "Please provide a directory or use "./dvcbs.sh -dm" to download then build the latest OSKR OTA."
+        echo "Please provide a directory or use "./dvcbs-reloaded.sh -dm" to download then build the latest OSKR OTA."
         exit 0
     fi
 elif [ -f ${origdir}apq8009-robot-sysfs.img ]; then
@@ -112,7 +112,7 @@ elif [ -f ${origdir}/apq8009-robot-sysfs.img ]; then
         echo "apq8009-robot-sysfs.img found."
         dir=${origdir}/
      else
-     echo "Please provide a directory with a mounted OTA in it or use -dm to download the latest OSKR build and mount it. If you did use -dm, do not provide a directory."
+     echo "Please provide a directory with a mounted OTA in it or use -dm to download the latest build and mount it. If you did use -dm, do not provide a directory."
      exit 0
 fi
 }
@@ -120,7 +120,7 @@ fi
 function parsedirmount()
 {
 if [ -z "${origdir}" ]; then
-    dir=oskrcurrent/
+    dir=mounted/
 elif [ -f ${origdir}*.ota ] || [ -f ${origdir}*.img ]; then
         echo "Dir parsed successfully."
         dir=${origdir}
@@ -169,18 +169,18 @@ fi
 
 function downloadmount()
 {
-if [ ! -d oskrcurrent ]; then
-    echo "Making ./oskrcurrent folder."
-    mkdir oskrcurrent
+if [ ! -d mounted ]; then
+    echo "Making ./mounted folder."
+    mkdir mounted
 fi
-if [ ! -f oskrcurrent/* ]; then
-    echo "Downloading latest OSKR OTA from DDL servers."
-    curl -o oskrcurrent/latest.ota http://ota.global.anki-services.com/vic/oskr/full/latest.ota
+if [ ! -f mounted/* ]; then
+    echo "Downloading latest wireOS ota from Wire's server."
+    curl -o mounted/latest.ota http://ota.pvic.xyz/vic/raw/dev/latest.ota
     echo "Done downloading."
-else if [ -f oskrcurrent/manifest.ini ]; then
+else if [ -f mounted/manifest.ini ]; then
     echo "An OTA has already been mounted here. Delete everything in the directory or build."
     exit 0
-else if [ -f oskrcurrent/*.ota ]; then
+else if [ -f mounted/*.ota ]; then
     echo "There is already an OTA in here. Using."
 fi
 fi
@@ -223,7 +223,7 @@ function copyfull()
   echo ro.build.version.incremental=${code} >> ${dir}edits/build.prop
   echo ro.build.user=root >> ${dir}edits/build.prop
   echo ro.build.custom.target=${BUILD_TYPE} >> ${dir}edits/build.prop
-  if [ ${BUILD_TYPE} == oskr ]; then
+  if [ ${BUILD_TYPE} == oskrs ]; then
      echo ID="msm-perf" > ${dir}edits/etc/os-release
      echo NAME="msm-perf" >> ${dir}edits/etc/os-release
      echo VERSION="${builddate}" >> ${dir}edits/etc/os-release
@@ -346,15 +346,15 @@ function buildcustomandsign()
   bootsha=$(sha256sum ${refo}/tempBoot/apq8009-robot-boot.img.dec | head -c 64)
   #echoing would be long so just printf
   printf '%s\n' '[META]' 'manifest_version=1.0.0' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=1' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
-  if [ ${BUILD_TYPE} == "oskr" ]; then
+  if [ ${BUILD_TYPE} == "oskrs" ]; then
      echo "Signing manifest.ini"
      openssl dgst -sha256 -sign ${keyfo}/ota.pem -out ${refo}/manifest.sha256 ${refo}/manifest.ini
   else
-     echo "Not signing because build type is not oskr."
+     echo "Not signing because build type is not oskrs."
   fi
   echo "Putting into tar."
   tar -C ${refo} -cvf ${refo}/temp.tar manifest.ini
-  if [ ${BUILD_TYPE} == "oskr" ]; then
+  if [ ${BUILD_TYPE} == "oskrs" ]; then
      tar -C ${refo} -rf ${refo}/temp.tar manifest.sha256
   else
      echo "Not putting manifest.sha256 in because the build type is not oskr."
@@ -392,7 +392,7 @@ if [ $# -gt 0 ]; then
 	    ;;
 	-dm) 
 	    downloadmount
-	    dir=oskrcurrent/
+	    dir=mounted/
 	    mountota
 	    ;;
 	-b) 
