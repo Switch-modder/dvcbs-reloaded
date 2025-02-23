@@ -175,7 +175,7 @@ if [ ! -d mounted ]; then
 fi
 if [ ! -f mounted/* ]; then
     echo "Downloading latest wireOS ota from Wire's server."
-    curl -o mounted/latest.ota http://ota.pvic.xyz/vic/raw/dev/latest.ota
+    wget http://ota.pvic.xyz/vic/raw/dev/latest.ota -P mounted/
     echo "Done downloading."
 else if [ -f mounted/manifest.ini ]; then
     echo "An OTA has already been mounted here. Delete everything in the directory or build."
