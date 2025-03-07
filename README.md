@@ -1,7 +1,7 @@
-# dvcbs
-DDL Vector Custom Build Script
+# dvcbs-reloaded
+Anki/DDL Vector Custom Build Script
 
-This script is an update on my previous script. This one is a lot more automated, checks for everything I could think of, and is something I could actually see a regular dev using without that much hassle.
+This script is an update on the original dvcbs made by Wire. This updated version has support for DVT2 and 3 targets as well as fixing the broken download command.
 
 This is a bash script, so you have to run it in a Linux environment.
 
