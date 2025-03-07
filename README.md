@@ -29,8 +29,10 @@ This is still a full-root script, which means you have to either run `sudo -s` b
 `-h`
 * Shows the usage page.
 
-`-dm`
+`-dm(type)`
 * This downloads the latest OTA from wire's server and mounts it in mounted/.
+* Types are OSKR, DEV, DVT2, DVT3
+* Example: `./dvcbs-reloaded.sh -dmOSKR`
 
 `-m {dir}`
 * example when mounting oskrlatest (if already downloaded): `./dvcbs-reloaded.sh -m`
@@ -38,21 +40,21 @@ This is still a full-root script, which means you have to either run `sudo -s` b
 * This will mount the OTA or apq8009-robot-sysfs.img in the directory you give it. If you used -dm, this will automatically detect the mounted folder and you don't have to provide a dir.
 
 `-b {versionbase} {versioncode} {dir}`
-* example when building oskrlatest: `./dvcbs-reloaded.sh -b 1.8.0 123`
+* example when building OSKR: `./dvcbs-reloaded.sh -b 1.8.0 123`
 * example when building in your own dir: `./dvcbs-reloaded.sh -b 1.8.0 123 otawire`
 * This builds the OTA or apq8009-robot-sysfs.img in the directory you give it. If you don't have a directory, it will try to find the mounted folder and build for OSKR robots.
 
 `-bt {versionbase} {versioncode} {type} {dir}`
-* This builds the OTA or apq8009-robot-sysfs.img in the dirctory you give it, but with a certain build type. whiskey, dev, and oskr are your options.
+* This builds the OTA or apq8009-robot-sysfs.img in the dirctory you give it, but with a certain build type. whiskey, dev, dvt2, dvt3, and oskr are your options.
 
 `-bf {versionbase} {versioncode} {dir}`
-* Builds an apq8009-robot-sysfs.img for all targets.
+* Builds an apq8009-robot-sysfs.img for all targets. (Broken atm)
 
 ## Example build
 
 Now that you are in `sudo -s` and you are in the directory with `dvcbs-reloaded.sh`, you are ready to make a build.
 
-First, lets get the latest OSKR OTA and mount it. run `./dvcbs-reloaded.sh -dm`
+First, lets get the latest OSKR OTA and mount it. run `./dvcbs-reloaded.sh -dmOSKR`
 
 This makes a `mounted` directory with a mounted OSKR OTA in it.
 
@@ -74,7 +76,7 @@ Get out of SSH and SCP the key into that /data/etc/ota_keys/ folder.
 
 In a separate terminal, run `sudo ifconfig` to find your IP.
 
-Run `cd oskrcurrent && python3 -m http.server`
+Run `cd mounted && python3 -m http.server`
 
 SSH back into him and run `/anki/bin/update-engine http://computerip:8000/1.8.0.1.ota -v` (replace computerip with the actual computer's ip)
 
