@@ -52,7 +52,7 @@ function ctrl_c() {
 
 function checktype()
 {
-if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ]; then
+if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ]; then
    if [ -z ${BUILD_TYPE} ]; then
       echo "No build type provided. Using oskr as default."
       BUILD_TYPE=oskr
@@ -60,20 +60,23 @@ if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD
    elif [ ${BUILD_TYPE} == "dev" ]; then
       echo "Dev build type selected. Note that this won't work on your OSKR bot. Only Anki-unlocked bots. This build won't be signed."
       BUILD_SUFFIX=d
+   elif [ ${BUILD_TYPE} == "dvt3" ]; then
+      echo "DVT3 build type selected. This is made for bots running DVT1 or 3 bodyboards and can run on OSKR"
+      BUILD_SUFFIX=dvt3
    elif [ ${BUILD_TYPE} == "oskrs" ]; then
-      echo "OSKRs build type selected."
+      echo "OSKRs build type selected. This build will have a manifest.sha256 file."
       BUILD_SUFFIX=oskr
    elif [ ${BUILD_TYPE} == "whiskey" ]; then
       echo "Whiskey build type selected. This will work on a dev bot, but rampost may flash a weird dfu causing the back lights to go weird. This is meant for Whiskey DVT1 bots and not normal bots."
-      BUILD_SUFFIX=d
+      BUILD_SUFFIX=w
    elif [ ${BUILD_TYPE} == "oskr" ]; then
-      echo "OSKR no signing build type selected. This build won't be signed."
+      echo "OSKR build type selected. This build won't be signed."
       BUILD_SUFFIX=oskr
    elif [ ${BUILD_TYPE} == "orange" ]; then
-      BUILD_SUFFIX=d
-      echo "Orange-boot build type selected. This build won't be signed, and is recommended to be used with DVT3/4."
+      BUILD_SUFFIX=o
+      echo "Orange-boot build type selected. This isn't recommended because of how old the orange boot kernels are."
 else
-      echo "Provided build type invalid. Choices: dev, oskr, oskrns, whiskey, orange"
+      echo "Provided build type invalid. Choices: dev, dvt3, oskr, oskrs, whiskey, orange"
       exit 0
 fi
 fi
@@ -253,8 +256,11 @@ function copyfull()
   cp -r ${refo}/modules/${BUILD_TYPE}/modules ${dir}edits/usr/lib/
   chmod -R +rwx ${dir}edits/usr/lib/modules
   echo "Putting in new update-engine"
-  cp ${refo}/update-engines/${BUILD_TYPE} ${dir}edits/anki/bin/update-engine
+  cp ${refo}/update-engines/update-engine ${dir}edits/anki/bin/update-engine
+  echo "Putting in update engine to install signed builds later if you want"
+  cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
   chmod +rwx ${dir}edits/anki/bin/update-engine
+  chmod +rwx ${dir}edits/anki/bin/update-engine-signed
   if [ ! -f ${dir}edits/anki/bin/vic-log-event ]; then
      echo "This doesn't contain vic-log-event which is required for update-engine to work. Maybe you are messing with older vicos. Copying it in."
      cp ${refo}/vic-log-event ${dir}edits/anki/bin/
