@@ -22,10 +22,13 @@ builddate=${buildyear}${buildmonth}${buildday}${buildhour}${buildminute}
 function help()
 {
    echo "-h                                                   This message"
-   echo "-dm                                                  Downloads latest OSKR OTA and mounts it in 'mounted' directory."
+   echo "-dmOSKR                                              Downloads latest OSKR OTA and mounts it in 'mounted' directory."
+   echo "-dmDEV                                               Downloads latest DEV OTA and mounts it in 'mounted' directory."
+   echo "-dmDVT3                                              Downloads latest DVT3 OTA and mounts it in 'mounted' directory."
+   echo "-dmDVT2                                              Downloads latest DVT2 OTA and mounts it in 'mounted' directory."
    echo "-m {path/to/ota}                                     Mounts the OTA provided."
    echo "-b {versionbase} {versioncode} {dir}                 Builds apq8009-robot-sysfs.img in directory provided. If you used -dm, don't put a directory. It will auto detect."
-   echo "-bt {versionbase} {versioncode} {type} {dir}         Build apq8009-robot-sysfs.img in directory provided with a specific type. Choice are dev, whiskey, oskr, dvt3, and orange boot. It will auto detect the 'mounted' folder."
+   echo "-bt {versionbase} {versioncode} {type} {dir}         Build apq8009-robot-sysfs.img in directory provided with a specific type. Choice are dev, dvt2, dvt3, whiskey, oskr, and orange boot. It will auto detect the 'mounted' folder."
    echo "-mbt {versionbase} {versioncode} {type} {dir}        Mounts then builds and OTA with type and dir you provided. Type and dir and required."
    exit 0
 }
@@ -60,6 +63,9 @@ if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_
    elif [ ${BUILD_TYPE} == "dev" ]; then
       echo "Dev build type selected. Note that this won't work on your OSKR bot. Only Anki-unlocked bots. This build won't be signed."
       BUILD_SUFFIX=d
+   elif [ ${BUILD_TYPE} == "dvt2" ]; then
+      echo "DVT2 build type selected. This is made for bots running DVT2 bodyboards with DVT2-best.dfu firmware. This can run on OSKR"
+      BUILD_SUFFIX=dvt2
    elif [ ${BUILD_TYPE} == "dvt3" ]; then
       echo "DVT3 build type selected. This is made for bots running DVT1 or 3 bodyboards and can run on OSKR"
       BUILD_SUFFIX=dvt3
@@ -170,7 +176,27 @@ if [ -z ${code} ]; then
 fi
 }
 
-function downloadmount()
+function downloadmountoskr()
+{
+if [ ! -d mounted ]; then
+    echo "Making ./mounted folder."
+    mkdir mounted
+fi
+if [ ! -f mounted/* ]; then
+    echo "Downloading latest wireOS ota from Wire's server."
+    wget http://ota.pvic.xyz/vic/raw/oskr/latest.ota -P mounted/
+    echo "Done downloading."
+else if [ -f mounted/manifest.ini ]; then
+    echo "An OTA has already been mounted here. Delete everything in the directory or build."
+    exit 0
+else if [ -f mounted/*.ota ]; then
+    echo "There is already an OTA in here. Using."
+fi
+fi
+fi
+}
+
+function downloadmountdev()
 {
 if [ ! -d mounted ]; then
     echo "Making ./mounted folder."
@@ -179,6 +205,46 @@ fi
 if [ ! -f mounted/* ]; then
     echo "Downloading latest wireOS ota from Wire's server."
     wget http://ota.pvic.xyz/vic/raw/dev/latest.ota -P mounted/
+    echo "Done downloading."
+else if [ -f mounted/manifest.ini ]; then
+    echo "An OTA has already been mounted here. Delete everything in the directory or build."
+    exit 0
+else if [ -f mounted/*.ota ]; then
+    echo "There is already an OTA in here. Using."
+fi
+fi
+fi
+}
+
+function downloadmountdvt2()
+{
+if [ ! -d mounted ]; then
+    echo "Making ./mounted folder."
+    mkdir mounted
+fi
+if [ ! -f mounted/* ]; then
+    echo "Downloading latest wireOS ota from Wire's server."
+    wget http://ota.pvic.xyz/vic/raw/dvt2/latest.ota -P mounted/
+    echo "Done downloading."
+else if [ -f mounted/manifest.ini ]; then
+    echo "An OTA has already been mounted here. Delete everything in the directory or build."
+    exit 0
+else if [ -f mounted/*.ota ]; then
+    echo "There is already an OTA in here. Using."
+fi
+fi
+fi
+}
+
+function downloadmountdvt3()
+{
+if [ ! -d mounted ]; then
+    echo "Making ./mounted folder."
+    mkdir mounted
+fi
+if [ ! -f mounted/* ]; then
+    echo "Downloading latest wireOS ota from Wire's server."
+    wget http://ota.pvic.xyz/vic/raw/dvt3/latest.ota -P mounted/
     echo "Done downloading."
 else if [ -f mounted/manifest.ini ]; then
     echo "An OTA has already been mounted here. Delete everything in the directory or build."
@@ -255,9 +321,9 @@ function copyfull()
   rm -rf ${dir}edits/usr/lib/modules
   cp -r ${refo}/modules/${BUILD_TYPE}/modules ${dir}edits/usr/lib/
   chmod -R +rwx ${dir}edits/usr/lib/modules
-  echo "Putting in new update-engine"
+  echo "Putting in new update-engine for installing unsigned firmwares (Stored at /anki/bin/update-engine)"
   cp ${refo}/update-engines/update-engine ${dir}edits/anki/bin/update-engine
-  echo "Putting in update engine to install signed builds later if you want"
+  echo "Putting in update-engine to install signed builds later if you want (Stored at /anki/bin/update-engine-signed)"
   cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
   chmod +rwx ${dir}edits/anki/bin/update-engine
   chmod +rwx ${dir}edits/anki/bin/update-engine-signed
@@ -396,8 +462,23 @@ if [ $# -gt 0 ]; then
             parsedirmount
 	    mountota
 	    ;;
-	-dm) 
-	    downloadmount
+	-dmOSKR) 
+	    downloadmountoskr
+	    dir=mounted/
+	    mountota
+	    ;;
+	-dmDEV) 
+	    downloadmountdev
+	    dir=mounted/
+	    mountota
+	    ;;
+	-dmDVT2) 
+	    downloadmountdvt2
+	    dir=mounted/
+	    mountota
+	    ;;
+	-dmDVT3) 
+	    downloadmountdvt3
 	    dir=mounted/
 	    mountota
 	    ;;
