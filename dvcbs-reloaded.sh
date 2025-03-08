@@ -351,8 +351,7 @@ function copyfull()
 fi
   cp ${keyfo}/ota.pub ${dir}edits/anki/etc/ota.pub
   if [ -f ${dir}edits/anki/data/assets/cozmo_resources/config/server_config.json ]; then
-    if grep -q "dev" ${dir}edits/anki/data/assets/cozmo_resources/config/server_config.json; then
-      echo "There is a dev server config in here. Copying in a prod config."
+      echo "Putting in a modern server config"
       cp ${refo}/server_config.json ${dir}edits/anki/data/assets/cozmo_resources/config/server_config.json
   fi
 fi
