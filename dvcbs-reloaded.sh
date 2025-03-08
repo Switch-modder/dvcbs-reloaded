@@ -24,8 +24,9 @@ function help()
    echo "-h                                                   This message"
    echo "-dmOSKR                                              Downloads latest OSKR OTA and mounts it in 'mounted' directory."
    echo "-dmDEV                                               Downloads latest DEV OTA and mounts it in 'mounted' directory."
-   echo "-dmDVT3                                              Downloads latest DVT3 OTA and mounts it in 'mounted' directory."
    echo "-dmDVT2                                              Downloads latest DVT2 OTA and mounts it in 'mounted' directory."
+   echo "-dmDVT3                                              Downloads latest DVT3 OTA and mounts it in 'mounted' directory."
+   echo "-dmLEGACY                                            Downloads a ota made for use with really old /anki folders."
    echo "-m {path/to/ota}                                     Mounts the OTA provided."
    echo "-b {versionbase} {versioncode} {dir}                 Builds apq8009-robot-sysfs.img in directory provided. If you used -dm, don't put a directory. It will auto detect."
    echo "-bt {versionbase} {versioncode} {type} {dir}         Build apq8009-robot-sysfs.img in directory provided with a specific type. Choice are dev, dvt2, dvt3, whiskey, oskr, and orange boot. It will auto detect the 'mounted' folder."
@@ -245,6 +246,26 @@ fi
 if [ ! -f mounted/* ]; then
     echo "Downloading latest wireOS ota from Wire's server."
     wget http://ota.pvic.xyz/vic/raw/dvt3/latest.ota -P mounted/
+    echo "Done downloading."
+else if [ -f mounted/manifest.ini ]; then
+    echo "An OTA has already been mounted here. Delete everything in the directory or build."
+    exit 0
+else if [ -f mounted/*.ota ]; then
+    echo "There is already an OTA in here. Using."
+fi
+fi
+fi
+}
+
+function downloadmountlegacy()
+{
+if [ ! -d mounted ]; then
+    echo "Making ./mounted folder."
+    mkdir mounted
+fi
+if [ ! -f mounted/* ]; then
+    echo "Downloading ota made for legacy /anki folders."
+    wget http://modder.my.to:81/otas/Anki/reconstructed/DEV/EasyEyes.ota -P mounted/
     echo "Done downloading."
 else if [ -f mounted/manifest.ini ]; then
     echo "An OTA has already been mounted here. Delete everything in the directory or build."
@@ -478,6 +499,11 @@ if [ $# -gt 0 ]; then
 	    ;;
 	-dmDVT3) 
 	    downloadmountdvt3
+	    dir=mounted/
+	    mountota
+	    ;;
+	-dmLEGACY) 
+	    downloadmountlegacy
 	    dir=mounted/
 	    mountota
 	    ;;
