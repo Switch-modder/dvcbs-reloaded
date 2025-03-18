@@ -374,7 +374,7 @@ fi
 #  if [ -f ${dir}edits/anki/data/assets/cozmo_resources/config/server_config.json ]; then
 #  echo "Putting in a modern server config"
 #  cp ${refo}/server_config.json ${dir}edits/anki/data/assets/cozmo_resources/config/server_config.json
-fi
+#fi
   cp ${refo}/boots/${BUILD_TYPE}.img.gz ${refo}/apq8009-robot-boot.img.gz
 }
 
