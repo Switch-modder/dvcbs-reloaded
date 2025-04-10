@@ -164,7 +164,7 @@ elif [ -f ${dir}apq8009-robot-sysfs.img ]; then
     echo "Mounted in ${dir}edits!"
     exit 0
 else
-    echo "Nothing to mount. Please provide a directory with a .ota or apq8009-robot-sysfs.img in it or use -dm to download the latest OSKR build and mount it."
+    echo "Nothing to mount. Please provide a directory with a .ota or apq8009-robot-sysfs.img in it or use -dm<Type> to download the latest OSKR build and mount it."
     exit 0
 fi
 }
