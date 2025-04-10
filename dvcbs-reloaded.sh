@@ -312,7 +312,14 @@ function copyfull()
   echo ro.build.type=development >> ${dir}edits/build.prop
   echo ro.build.version.incremental=${code} >> ${dir}edits/build.prop
   echo ro.build.user=root >> ${dir}edits/build.prop
-  echo ro.build.custom.target=${BUILD_TYPE} >> ${dir}edits/build.prop
+  echo ro.build.target=${BUILD_TYPE} >> ${dir}edits/build.prop
+
+  if [ ${BUILD_TYPE} == dvt2 ]; then
+     echo ro.build.target=5 >> ${dir}edits/build.prop
+  else
+     echo ro.build.target=${BUILD_TYPE} >> ${dir}edits/build.prop
+  fi
+
   if [ ${BUILD_TYPE} == oskrs ]; then
      echo ID="msm-perf" > ${dir}edits/etc/os-release
      echo NAME="msm-perf" >> ${dir}edits/etc/os-release
