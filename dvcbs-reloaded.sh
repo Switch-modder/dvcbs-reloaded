@@ -56,7 +56,7 @@ function ctrl_c() {
 
 function checktype()
 {
-if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ]; then
+if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ] || [ ! ${BUILD_TYPE} == "prod" ]; then
    if [ -z ${BUILD_TYPE} ]; then
       echo "No build type provided. Using oskr as default."
       BUILD_TYPE=oskr
@@ -82,8 +82,11 @@ if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_
    elif [ ${BUILD_TYPE} == "orange" ]; then
       BUILD_SUFFIX=o
       echo "Orange-boot build type selected. This isn't recommended because of how old the orange boot kernels are."
+   elif [ ${BUILD_TYPE} == "prod" ]; then
+      BUILD_SUFFIX=p
+      echo "Prod build type selected. This build will be signed and installable from recovery."
 else
-      echo "Provided build type invalid. Choices: dev, dvt3, oskr, oskrs, whiskey, orange"
+      echo "Provided build type invalid. Choices: dev, dvt3, oskr, oskrs, whiskey, orange, prod"
       exit 0
 fi
 fi
@@ -111,8 +114,8 @@ if [ -z "${origdir}" ]; then
     if [ -f mounted/apq8009-robot-sysfs.img ]; then
         echo "./mounted has a mounted OTA. Using."
         dir=mounted/
-    else 
-        echo "Please provide a directory or use "./dvcbs-reloaded.sh -dm" to download then build the latest OSKR OTA."
+    else
+        echo "Please provide a directory or use "./dvcbs-reloaded.sh -dm<type>" to download then build the latest OSKR OTA."
         exit 0
     fi
 elif [ -f ${origdir}apq8009-robot-sysfs.img ]; then
@@ -164,7 +167,7 @@ elif [ -f ${dir}apq8009-robot-sysfs.img ]; then
     echo "Mounted in ${dir}edits!"
     exit 0
 else
-    echo "Nothing to mount. Please provide a directory with a .ota or apq8009-robot-sysfs.img in it or use -dm<Type> to download the latest OSKR build and mount it."
+    echo "Nothing to mount. Please provide a directory with a .ota or apq8009-robot-sysfs.img in it or use -dm to download the latest OSKR build and mount it."
     exit 0
 fi
 }
@@ -308,7 +311,7 @@ function copyfull()
   echo ro.anki.victor.version=${base}.${code} >> ${dir}edits/build.prop
   echo ro.build.fingerprint=${base}.${code}${BUILD_SUFFIX} >> ${dir}edits/build.prop
   echo ro.build.id=${base}.${code}${BUILD_SUFFIX} >> ${dir}edits/build.prop
-  echo ro.build.display.id=v${base}.${code}${BUILD_SUFFIX} >> ${dir}edits/build.prop
+  echo ro.build.display.id=${base}.${code}${BUILD_SUFFIX} >> ${dir}edits/build.prop
   echo ro.build.type=development >> ${dir}edits/build.prop
   echo ro.build.version.incremental=${code} >> ${dir}edits/build.prop
   echo ro.build.user=root >> ${dir}edits/build.prop
@@ -441,17 +444,21 @@ function buildcustomandsign()
   gzip -d ${refo}/tempBoot/apq8009-robot-boot.img.dec.gz
   bootbytes=$(du -b ${refo}/tempBoot/apq8009-robot-boot.img.dec | awk '{print $1;}')
   bootsha=$(sha256sum ${refo}/tempBoot/apq8009-robot-boot.img.dec | head -c 64)
-  #echoing would be long so just printf
-  printf '%s\n' '[META]' 'manifest_version=1.0.0' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=1' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
-  if [ ${BUILD_TYPE} == "oskrs" ]; then
+  if [ ${BUILD_TYPE} == "prod" ]; then
+     printf '%s\n' '[META]' 'manifest_version=0.9.2' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=0' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
+  else
+     #echoing would be long so just printf
+     printf '%s\n' '[META]' 'manifest_version=1.0.0' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=1' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
+  fi
+  if [ ${BUILD_TYPE} == "oskrs" ] || [ ${BUILD_TYPE} == "prod" ]; then
      echo "Signing manifest.ini"
-     openssl dgst -sha256 -sign ${keyfo}/ota.pem -out ${refo}/manifest.sha256 ${refo}/manifest.ini
+     openssl dgst -sha256 -sign ${refo}/ota_prod.key -out ${refo}/manifest.sha256 ${refo}/manifest.ini
   else
      echo "Not signing because build type is not oskrs."
   fi
   echo "Putting into tar."
   tar -C ${refo} -cvf ${refo}/temp.tar manifest.ini
-  if [ ${BUILD_TYPE} == "oskrs" ]; then
+  if [ ${BUILD_TYPE} == "oskrs" ] || [ ${BUILD_TYPE} == "prod" ]; then
      tar -C ${refo} -rf ${refo}/temp.tar manifest.sha256
   else
      echo "Not putting manifest.sha256 in because the build type is not oskr."

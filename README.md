@@ -1,7 +1,7 @@
 # dvcbs-reloaded
 Anki/DDL Vector Custom Build Script
 
-This script is an update on the original dvcbs made by Wire. This updated version has support for DVT2 and 3 targets as well as fixing the broken download command.
+This script is an update on the original dvcbs made by Wire. This updated version has support for DVT2 and 3 targets, adding prod building as well as fixing the broken download command.
 
 This is a bash script, so you have to run it in a Linux environment.
 
@@ -45,7 +45,7 @@ This is still a full-root script, which means you have to either run `sudo -s` b
 * This builds the OTA or apq8009-robot-sysfs.img in the directory you give it. If you don't have a directory, it will try to find the mounted folder and build for OSKR robots.
 
 `-bt {versionbase} {versioncode} {type} {dir}`
-* This builds the OTA or apq8009-robot-sysfs.img in the dirctory you give it, but with a certain build type. whiskey, dev, dvt2, dvt3, and oskr are your options.
+* This builds the OTA or apq8009-robot-sysfs.img in the dirctory you give it, but with a certain build type. whiskey, prod, dev, dvt2, dvt3, and oskr are your options.
 
 `-bf {versionbase} {versioncode} {dir}`
 * Builds an apq8009-robot-sysfs.img for all targets. (Broken atm)
