@@ -357,6 +357,8 @@ function copyfull()
   # cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
   chmod +rwx ${dir}edits/anki/bin/update-engine
   # chmod +rwx ${dir}edits/anki/bin/update-engine-signed
+  echo "Adding ssh_root_key (Obtain at https://modder.my.to/ssh_root_key)"
+  cp ${refo}/add-ssh-root-key.sh ${dir}edits/etc/init.d/localsshuser.sh
   if [ ! -f ${dir}edits/anki/bin/vic-log-event ]; then
      echo "This doesn't contain vic-log-event which is required for update-engine to work. Maybe you are messing with older vicos. Copying it in."
      cp ${refo}/vic-log-event ${dir}edits/anki/bin/
