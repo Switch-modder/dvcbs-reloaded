@@ -351,12 +351,12 @@ function copyfull()
   rm -rf ${dir}edits/usr/lib/modules
   cp -r ${refo}/modules/${BUILD_TYPE}/modules ${dir}edits/usr/lib/
   chmod -R +rwx ${dir}edits/usr/lib/modules
-  echo "Putting in new update-engine for installing unsigned firmwares (Stored at /anki/bin/update-engine)"
+  echo "Putting in new update-engine for installing both signed and unsigned firmwares (Stored at /anki/bin/update-engine)"
   cp ${refo}/update-engines/update-engine ${dir}edits/anki/bin/update-engine
-  echo "Putting in update-engine to install signed builds later if you want (Stored at /anki/bin/update-engine-signed)"
-  cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
+  # echo "Putting in update-engine to install signed builds later if you want (Stored at /anki/bin/update-engine-signed)"
+  # cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
   chmod +rwx ${dir}edits/anki/bin/update-engine
-  chmod +rwx ${dir}edits/anki/bin/update-engine-signed
+  # chmod +rwx ${dir}edits/anki/bin/update-engine-signed
   if [ ! -f ${dir}edits/anki/bin/vic-log-event ]; then
      echo "This doesn't contain vic-log-event which is required for update-engine to work. Maybe you are messing with older vicos. Copying it in."
      cp ${refo}/vic-log-event ${dir}edits/anki/bin/
