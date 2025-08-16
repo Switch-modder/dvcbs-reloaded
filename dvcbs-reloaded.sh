@@ -83,7 +83,7 @@ if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_
       BUILD_SUFFIX=o
       echo "Orange-boot build type selected. This isn't recommended because of how old the orange boot kernels are."
    elif [ ${BUILD_TYPE} == "prod" ]; then
-      BUILD_SUFFIX=p
+      BUILD_SUFFIX=
       echo "Prod build type selected. This build will be signed and installable from recovery."
 else
       echo "Provided build type invalid. Choices: dev, dvt3, oskr, oskrs, whiskey, orange, prod"
