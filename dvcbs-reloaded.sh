@@ -54,7 +54,8 @@ function ctrl_c() {
     exit 1 
 }
 
-function checktype() {
+function checktype()
+{
 if [ ! "${BUILD_TYPE}" == "dev" ] && [ ! "${BUILD_TYPE}" == "dvt2" ] && [ ! "${BUILD_TYPE}" == "dvt3" ] && [ ! "${BUILD_TYPE}" == "oskrs" ] && [ ! "${BUILD_TYPE}" == "whiskey" ] && [ ! "${BUILD_TYPE}" == "oskr" ] && [ ! "${BUILD_TYPE}" == "orange" ] && [ ! "${BUILD_TYPE}" == "prod" ] && [ ! "${BUILD_TYPE}" == "ep" ]; then
     if [ -z "${BUILD_TYPE}" ]; then
     echo "No build type provided. Using oskr as default."
@@ -96,7 +97,6 @@ if [ "${DO_SIGN}" == "1" ]; then
     echo "DO_SIGN is set to 1, the build will be signed and installable from recovery"
 else
     echo "DO_SIGN isn't set to 1, the build will not be signed"
-fi
 fi
 }
 
