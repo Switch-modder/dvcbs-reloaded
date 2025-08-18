@@ -430,13 +430,13 @@ openssl enc -d -aes-256-ctr -pass file:${refo}/ota.pas -md md5 -in ${refo}/tempB
 gzip -d ${refo}/tempBoot/apq8009-robot-boot.img.dec.gz
 bootbytes=$(du -b ${refo}/tempBoot/apq8009-robot-boot.img.dec | awk '{print $1;}')
 bootsha=$(sha256sum ${refo}/tempBoot/apq8009-robot-boot.img.dec | head -c 64)
-if [[ ${BUILD_TYPE} == prod || ${BUILD_TYPE} == ep ]]; then
+if [ ${BUILD_TYPE} == "prod" || ${BUILD_TYPE} == "ep" ]; then
     printf '%s\n' '[META]' 'manifest_version=0.9.2' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=0' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
 else
     #echoing would be long so just printf
     printf '%s\n' '[META]' 'manifest_version=1.0.0' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=1' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
 fi
-if [ ${DO_SIGN} == 1 ]; then
+if [ ${DO_SIGN} == "1" ]; then
     echo "Signing manifest.ini"
     openssl dgst -sha256 -sign ${refo}/ota_prod.key -out ${refo}/manifest.sha256 ${refo}/manifest.ini > /dev/null
 else
@@ -444,7 +444,7 @@ else
 fi
 echo "Putting into tar."
 tar -C ${refo} -cvf ${refo}/temp.tar manifest.ini
-if [ ${DO_SIGN} == 1 ]; then
+if [ ${DO_SIGN} == "1" ]; then
     tar -C ${refo} -rf ${refo}/temp.tar manifest.sha256
 else
     echo "Not putting manifest.sha256 because the DO_SIGN env variable is not set to 1."
