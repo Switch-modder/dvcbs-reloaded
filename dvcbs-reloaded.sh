@@ -56,48 +56,47 @@ function ctrl_c() {
 
 function checktype()
 {
-if [ ! ${BUILD_TYPE} == "dev" ] || [ ! ${BUILD_TYPE} == "dvt3" ] || [ ! ${BUILD_TYPE} == "oskrs" ] || [ ! ${BUILD_TYPE} == "whiskey" ] || [ ! ${BUILD_TYPE} == "oskr" ] || [ ! ${BUILD_TYPE} == "orange" ] || [ ! ${BUILD_TYPE} == "prod" ] || [ ! ${BUILD_TYPE} == "ep" ]; then
-    if [ -z ${BUILD_TYPE} ]; then
-        echo "No build type provided. Using oskr as default."
-        BUILD_TYPE=oskr
-        BUILD_SUFFIX=oskr
-    elif [ ${BUILD_TYPE} == "dev" ]; then
-        echo "Dev build type selected. Note that this won't work on your OSKR bot. Only Anki-unlocked bots. This build won't be signed."
-        BUILD_SUFFIX=d
-    elif [ ${BUILD_TYPE} == "dvt2" ]; then
-        echo "DVT2 build type selected. This is made for bots running DVT2 bodyboards with DVT2-best.dfu firmware. This can run on OSKR"
-        BUILD_SUFFIX=dvt2
-    elif [ ${BUILD_TYPE} == "dvt3" ]; then
-        echo "DVT3 build type selected. This is made for bots running DVT1 or 3 bodyboards and can run on OSKR"
-        BUILD_SUFFIX=dvt3
-    elif [ ${BUILD_TYPE} == "oskrs" ]; then
-        echo "OSKRs build type selected. This build will have a manifest.sha256 file."
-        BUILD_SUFFIX=oskr
-    elif [ ${BUILD_TYPE} == "whiskey" ]; then
-        echo "Whiskey build type selected. This will work on a dev bot, but rampost may flash a weird dfu causing the back lights to go weird. This is meant for Whiskey DVT1 bots and not normal bots."
-        BUILD_SUFFIX=w
-    elif [ ${BUILD_TYPE} == "oskr" ]; then
-        echo "OSKR build type selected. This build will boot on OSKR bots."
-        BUILD_SUFFIX=oskr
-    elif [ ${BUILD_TYPE} == "orange" ]; then
-        BUILD_SUFFIX=o
-        echo "Orange-boot build type selected. This isn't recommended because of how old the orange boot kernels are."
-    elif [ ${BUILD_TYPE} == "prod" ]; then
-        BUILD_SUFFIX=
-        echo "Prod build type selected. This build will boot on prod bots."
-    elif [ ${BUILD_TYPE} == "ep" ]; then
-        BUILD_SUFFIX=ep
-        echo "Escape Pod build type selected. This build is designed to work with wire-pod or ddl's escape pod."
-    else
-        echo "Provided build type invalid. Choices: dev, dvt3, oskr, oskrs, whiskey, orange, prod, ep"
-        exit 0
-    fi
+if [ ! "${BUILD_TYPE}" == "dev" ] && [ ! "${BUILD_TYPE}" == "dvt2" ] && [ ! "${BUILD_TYPE}" == "dvt3" ] && [ ! "${BUILD_TYPE}" == "oskrs" ] && [ ! "${BUILD_TYPE}" == "whiskey" ] && [ ! "${BUILD_TYPE}" == "oskr" ] && [ ! "${BUILD_TYPE}" == "orange" ] && [ ! "${BUILD_TYPE}" == "prod" ] && [ ! "${BUILD_TYPE}" == "ep" ]; then
+    if [ -z "${BUILD_TYPE}" ]; then
+    echo "No build type provided. Using oskr as default."
+    BUILD_TYPE=oskr
+    BUILD_SUFFIX=oskr
+elif [ "${BUILD_TYPE}" == "dev" ]; then
+    echo "Dev build type selected. Note that this won't work on your OSKR bot. Only Anki-unlocked bots. This build won't be signed."
+    BUILD_SUFFIX=d
+elif [ "${BUILD_TYPE}" == "dvt2" ]; then
+    echo "DVT2 build type selected. This is made for bots running DVT2 bodyboards with DVT2-best.dfu firmware. This can run on OSKR"
+    BUILD_SUFFIX=dvt2
+elif [ "${BUILD_TYPE}" == "dvt3" ]; then
+    echo "DVT3 build type selected. This is made for bots running DVT1 or 3 bodyboards and can run on OSKR"
+    BUILD_SUFFIX=dvt3
+elif [ "${BUILD_TYPE}" == "oskrs" ]; then
+    echo "OSKRs build type selected. This build will have a manifest.sha256 file."
+    BUILD_SUFFIX=oskr
+elif [ "${BUILD_TYPE}" == "whiskey" ]; then
+    echo "Whiskey build type selected. This will work on a dev bot, but rampost may flash a weird dfu causing the back lights to go weird. This is meant for Whiskey DVT1 bots and not normal bots."
+    BUILD_SUFFIX=w
+elif [ "${BUILD_TYPE}" == "oskr" ]; then
+    echo "OSKR build type selected. This build will boot on OSKR bots."
+    BUILD_SUFFIX=oskr
+elif [ "${BUILD_TYPE}" == "orange" ]; then
+    BUILD_SUFFIX=o
+    echo "Orange-boot build type selected. This isn't recommended because of how old the orange boot kernels are."
+elif [ "${BUILD_TYPE}" == "prod" ]; then
+    BUILD_SUFFIX=
+    echo "Prod build type selected. This build will boot on prod bots."
+elif [ "${BUILD_TYPE}" == "ep" ]; then
+    BUILD_SUFFIX=ep
+    echo "Escape Pod build type selected. This build is designed to work with wire-pod or ddl's escape pod."
+else
+    echo "Provided build type invalid. Choices: dev, dvt2, dvt3, oskr, oskrs, whiskey, orange, prod, ep"
+    exit 0
+fi
 
-    if [ ${DO_SIGN} == "1" ]; then
-        echo "DO_SIGN is set to 1, the build will be signed and installable from recovery"
-    else
-        echo "DO_SIGN isn't set to 1, the build will not be signed"
-    fi
+if [ "${DO_SIGN}" == "1" ]; then
+    echo "DO_SIGN is set to 1, the build will be signed and installable from recovery"
+else
+    echo "DO_SIGN isn't set to 1, the build will not be signed"
 fi
 }
 
