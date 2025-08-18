@@ -314,7 +314,7 @@ function copyfull()
   echo ro.build.display.id=${base}.${code}${BUILD_SUFFIX} >> ${dir}edits/build.prop
   echo ro.build.type=development >> ${dir}edits/build.prop
   echo ro.build.version.incremental=${code} >> ${dir}edits/build.prop
-  echo ro.build.user=$USER >> ${dir}edits/build.prop
+  echo ro.build.user=root >> ${dir}edits/build.prop
 
   if [ ${BUILD_TYPE} == dvt2 ]; then
      echo ro.build.target=5 >> ${dir}edits/build.prop
@@ -322,15 +322,27 @@ function copyfull()
      echo ro.build.target=${BUILD_TYPE} >> ${dir}edits/build.prop
   fi
 
-  echo ID="msm-perf" > ${dir}edits/etc/os-release
-  echo NAME="msm-perf" >> ${dir}edits/etc/os-release
-  echo VERSION="${builddate}" >> ${dir}edits/etc/os-release
-  echo VERSION_ID="${builddate}" >> ${dir}edits/etc/os-release
-  echo PRETTY_NAME="msm-perf ${builddate}" >> ${dir}edits/etc/os-release
-  echo "msm-perf ${builddate} \n \l" > ${dir}edits/etc/issue
-  echo " " >> ${dir}edits/etc/issue
-  echo "msm-perf ${builddate} %h" > ${dir}edits/etc/issue.net
-  echo " " >> ${dir}edits/etc/issue.net
+  if [ ${BUILD_TYPE} == oskrs ]; then
+     echo ID="msm-perf" > ${dir}edits/etc/os-release
+     echo NAME="msm-perf" >> ${dir}edits/etc/os-release
+     echo VERSION="${builddate}" >> ${dir}edits/etc/os-release
+     echo VERSION_ID="${builddate}" >> ${dir}edits/etc/os-release
+     echo PRETTY_NAME="msm-perf ${builddate}" >> ${dir}edits/etc/os-release
+     echo "msm-perf ${builddate} \n \l" > ${dir}edits/etc/issue
+     echo " " >> ${dir}edits/etc/issue
+     echo "msm-perf ${builddate} %h" > ${dir}edits/etc/issue.net
+     echo " " >> ${dir}edits/etc/issue.net
+  else
+     echo ID="msm" > ${dir}edits/etc/os-release
+     echo NAME="msm" >> ${dir}edits/etc/os-release
+     echo VERSION="${builddate}" >> ${dir}edits/etc/os-release
+     echo VERSION_ID="${builddate}" >> ${dir}edits/etc/os-release
+     echo PRETTY_NAME="msm ${builddate}" >> ${dir}edits/etc/os-release
+     echo "msm ${builddate} \n \l" > ${dir}edits/etc/issue
+     echo " " >> ${dir}edits/etc/issue
+     echo "msm ${builddate} %h" > ${dir}edits/etc/issue.net
+     echo " " >> ${dir}edits/etc/issue.net
+  fi
   echo ${base}.${code} > ${dir}edits/anki/etc/version
   echo ${base}.${code}${BUILD_SUFFIX} > ${dir}edits/etc/os-version
   echo ${base} > ${dir}edits/etc/os-version-base
@@ -341,7 +353,12 @@ function copyfull()
   chmod -R +rwx ${dir}edits/usr/lib/modules
   echo "Putting in new update-engine for installing both signed and unsigned firmwares (Stored at /anki/bin/update-engine)"
   cp ${refo}/update-engines/update-engine ${dir}edits/anki/bin/update-engine
+  # echo "Putting in update-engine to install signed builds later if you want (Stored at /anki/bin/update-engine-signed)"
+  # cp ${refo}/update-engines/update-engine-signed ${dir}edits/anki/bin/update-engine-signed
   chmod +rwx ${dir}edits/anki/bin/update-engine
+  # chmod +rwx ${dir}edits/anki/bin/update-engine-signed
+  echo "Adding ssh_root_key (Obtain at https://modder.my.to/ssh_root_key)"
+  cp ${refo}/add-ssh-root-key.sh ${dir}edits/etc/init.d/localsshuser.sh
   if [ ! -f ${dir}edits/anki/bin/vic-log-event ]; then
      echo "This doesn't contain vic-log-event which is required for update-engine to work. Maybe you are messing with older vicos. Copying it in."
      cp ${refo}/vic-log-event ${dir}edits/anki/bin/
@@ -355,9 +372,8 @@ function copyfull()
      if grep -q "victor" ${dir}edits/etc/ssh/authorized_keys; then
         echo "This build has a global ssh_root_key, and will not accept an oskr bot specific one. You can get the key here: https://wire.my.to/evresources/ssh_root_key"
      fi
-  elif [ -f ${dir}edits/etc/init.d/localsshuser.sh ]; then
-     echo "This must be a new ota, adding ssh_root_key! (Obtain at https://modder.my.to/ssh_root_key)"
-     cp ${refo}/add-ssh-root-key.sh ${dir}edits/etc/init.d/localsshuser.sh
+  else
+     echo "No authorized_keys."
   fi
   echo "Putting in your OTA signing key. Original ota.pub will be left in as a backup as /anki/etc/anki.pub."
   if [ ! -f ${dir}edits/anki/etc/anki.pub ]; then
@@ -436,18 +452,18 @@ function buildcustomandsign()
      #echoing would be long so just printf
      printf '%s\n' '[META]' 'manifest_version=1.0.0' 'update_version='${base}'.'${code}${BUILD_SUFFIX} 'ankidev=1' 'num_images=2' 'reboot_after_install=0' '[BOOT]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${bootbytes} 'sha256='${bootsha} '[SYSTEM]' 'encryption=1' 'delta=0' 'compression=gz' 'wbits=31' 'bytes='${sysfsbytes} 'sha256='${sysfssum} >${refo}/manifest.ini
   fi
-  if [ ${DO_SIGN} == "1" ]; then
+  if [ ${BUILD_TYPE} == "oskrs" ] || [ ${BUILD_TYPE} == "prod" ]; then
      echo "Signing manifest.ini"
      openssl dgst -sha256 -sign ${refo}/ota_prod.key -out ${refo}/manifest.sha256 ${refo}/manifest.ini
   else
-     echo "Not signing because DO_SIGN env variable is not set to 1."
+     echo "Not signing because build type is not oskrs."
   fi
   echo "Putting into tar."
   tar -C ${refo} -cvf ${refo}/temp.tar manifest.ini
-  if [ ${DO_SIGN} == "1" ]; then
+  if [ ${BUILD_TYPE} == "oskrs" ] || [ ${BUILD_TYPE} == "prod" ]; then
      tar -C ${refo} -rf ${refo}/temp.tar manifest.sha256
   else
-     echo "Not putting manifest.sha256 because the DO_SIGN env variable is not set to 1."
+     echo "Not putting manifest.sha256 in because the build type is not oskr."
   fi
   tar -C ${refo} -rf ${refo}/temp.tar apq8009-robot-boot.img.gz
   cp ${refo}/temp.tar ${dir}final/
